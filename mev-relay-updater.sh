@@ -18,7 +18,7 @@ CHAIN="Mainnet" # Mainnet, Sepolia, Goerli
 ##########################################################################
 
 # Program version
-VERSION="1.0"
+VERSION="1.0.1"
 
 # Define color codes
 bold=$(tput bold)
@@ -37,13 +37,29 @@ banner="${yellow}
 "
 echo -e "${banner}"
 
-# Run the update check
-LATEST_VERSION=$(curl -s https://raw.githubusercontent.com/jordanhillis/mev-relay-updater/main/version.txt)
-# Check if the fetched version number is greater than the current version
-if [ "$LATEST_VERSION" != "$VERSION" ]; then
-  echo -e " ${bold}${green}An update is available for MEV Relayer Updater!\n${cyan} Version: $LATEST_VERSION${normal}\n https://github.com/jordanhillis/mev-relay-updater\n"
-  read -p "Press enter to continue with old version..."
-fi
+# Update check function
+update_check() {
+  # Run the update check
+  LATEST_VERSION=$(curl -s -m 10 https://raw.githubusercontent.com/jordanhillis/mev-relay-updater/main/version.txt | tr -d '\n' || echo "")
+  # Unable to fetch remote version, so just skip the update check
+  if [ -z "$LATEST_VERSION" ]; then
+    printf "Failed to check for updates. Skipping update check.\n"
+    return
+  fi
+  # Validate the LATEST_VERSION format using a regex
+  if [[ ! "$LATEST_VERSION" =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
+    printf "Invalid remote version format: ${bold}${red}$LATEST_VERSION${reset}. Skipping update check.\n"
+    return
+  fi
+  # Check if the fetched version number is greater than the current version
+  if [ "$LATEST_VERSION" != "$VERSION" ]; then
+    echo -e " ${bold}${green}An update is available for MEV Relayer Updater!\n${cyan} Version: $LATEST_VERSION${normal}\n https://github.com/jordanhillis/mev-relay-updater\n"
+    read -p "Press enter to continue with old version..."
+  fi
+}
+
+# Check for updates
+update_check
 
 # Use curl to fetch the content of the URL
 content=$(curl -s "$URL")
