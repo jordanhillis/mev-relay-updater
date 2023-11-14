@@ -144,8 +144,13 @@ else
     echo " - ${bold}${green}RELAY $((i + 1)):${normal} ${urls[i]}"
   done
 
-  # Current relays
+  # Current relays using -relays format
   current_relays=$(grep -oP '(?<=-relays ).*(?=\s*$)' "$SERVICE_FILE")
+
+  # Current relays using -relay format
+  if [ -z "$current_relays" ]; then
+    current_relays=$(grep -oP '(?<=-relay\s)[^\s]+' mev-boost.service | awk '{printf (NR>1 ? "," : "") $0}')
+  fi
 
   # Join the new URLs with commas
   new_relays=$(
