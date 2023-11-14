@@ -149,7 +149,7 @@ else
 
   # Current relays using -relay format
   if [ -z "$current_relays" ]; then
-    current_relays=$(grep -oP '(?<=-relay\s)[^\s]+' mev-boost.service | awk '{printf (NR>1 ? "," : "") $0}')
+    current_relays=$(grep -oP '(?<=-relay\s)[^\s]+' "$SERVICE_FILE" | awk '{printf (NR>1 ? "," : "") $0}')
   fi
 
   # Join the new URLs with commas
